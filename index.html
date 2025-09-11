@@ -92,6 +92,20 @@
     .child-panel-history th, .child-panel-history td { padding: 10px; text-align: center; border-bottom: 1px solid #d1d5db; color: var(--cp-text); }
     .child-panel-history th { font-weight: bold; }
     #order-error-popup { background-color: #ffebee; color: #c62828; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; font-weight: bold; display: none; }
+    
+    /* --- NEW SUCCESS POPUP STYLE --- */
+    #order-success-popup {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        line-height: 1.6;
+        text-align: left;
+    }
+    #order-success-popup p { margin: 4px 0; }
+
     .whatsapp-btn { position:fixed; width:55px; height:55px; bottom:20px; right:20px; background:#25D366; color:#fff; border-radius:50%; text-align:center; font-size:28px; box-shadow:0 4px 8px rgba(0,0,0,.3); z-index:9999; line-height:55px; text-decoration:none; }
   </style>
 </head>
@@ -135,8 +149,9 @@
       <div class="form-box">
         <h3 class="form-title">📦 Place New Order</h3>
         <div id="order-error-popup"></div>
+        <div id="order-success-popup" class="hidden"></div>
         <h4 class="form-subtitle">🔍 Search</h4>
-        <input type="text" id="search" placeholder="Search service..." oninput="populateServices(true)" />
+        <input type="text" id="search" placeholder="Search service..." oninput="populateServices(true); hideOrderPopups();" />
         <h4 class="form-subtitle">Category</h4>
         <div class="custom-select-wrapper" id="categoryWrapper">
             <div class="custom-select-trigger"><span id="categoryValue">Select a category...</span></div>
@@ -148,9 +163,9 @@
             <div class="custom-options" id="serviceOptions"></div>
         </div>
         <h4 class="form-subtitle">Link</h4>
-        <input type="text" id="link" placeholder="Enter your link" />
+        <input type="text" id="link" placeholder="Enter your link" oninput="hideOrderPopups()" />
         <h4 class="form-subtitle">Quantity</h4>
-        <input type="number" id="quantity" value="1000" min="1" oninput="calculateTotal()" />
+        <input type="number" id="quantity" value="1000" min="1" oninput="calculateTotal(); hideOrderPopups();" />
         <p class="quantity-info" id="quantityInfo"></p>
         <h4 class="form-subtitle">Charge</h4>
         <input type="text" id="totalPrice" readonly />
@@ -343,7 +358,6 @@
         root.style.setProperty('--card-text', theme.cardText || '#555555');
         root.style.setProperty('--grad-start', theme.gradStart || '#6d28d9');
         root.style.setProperty('--grad-end', theme.gradEnd || '#4f46e5');
-        
         root.style.setProperty('--cp-grad-start', cpTheme.gradStart || '#fde047');
         root.style.setProperty('--cp-grad-end', cpTheme.gradEnd || '#a3e635');
         root.style.setProperty('--cp-container-bg', hexToRgba(cpTheme.containerBg || '#ffffff', 0.8));
@@ -427,7 +441,7 @@
                 })
                 .catch(() => {
                     alert("🔴 Critical Error: Balance deducted, but order failed. Refunding.");
-                    userRef.transaction(userData => { if(userData) { userData.balance += cost; userData.spent -= cost; } return userData; });
+                    userRef.transaction(userData => { if(userData) { userData.balance += cost; userData.spent -= amount; } return userData; });
                 });
             }
         }).catch(error => alert("🔴 Order Error: " + error.message));
@@ -498,11 +512,17 @@
     let selectedCategory = null;
     let selectedService = null;
 
+    function hideOrderPopups() {
+        document.getElementById('order-error-popup').style.display = 'none';
+        document.getElementById('order-success-popup').style.display = 'none';
+    }
+
     function initCustomDropdowns() {
         ['category', 'service'].forEach(type => {
             const wrapper = document.getElementById(`${type}Wrapper`);
             wrapper.querySelector('.custom-select-trigger').addEventListener('click', (event) => {
                 event.stopPropagation();
+                hideOrderPopups();
                 document.querySelectorAll('.custom-select-wrapper').forEach(w => { if (w !== wrapper) w.classList.remove('open'); });
                 wrapper.classList.toggle('open');
             });
@@ -528,6 +548,7 @@
             optEl.innerHTML = catName;
             optEl.dataset.value = catName;
             optEl.addEventListener('click', () => {
+                hideOrderPopups();
                 document.getElementById('search').value = '';
                 selectedCategory = catName;
                 document.getElementById('categoryValue').innerHTML = catName;
@@ -584,6 +605,7 @@
                 </div>`;
             
             optEl.addEventListener('click', () => {
+                hideOrderPopups();
                 selectedCategory = catName;
                 selectedService = servName;
                 document.getElementById('categoryValue').innerHTML = selectedCategory;
@@ -636,8 +658,11 @@
         document.getElementById("totalPrice").value = "₹" + total.toFixed(3);
     }
     
+    // === MODIFIED placeOrder FUNCTION with SCROLL and SUCCESS POPUP ===
     function placeOrder(){
         const errorPopup = document.getElementById('order-error-popup');
+        const successPopup = document.getElementById('order-success-popup');
+        hideOrderPopups(); // Hide any old messages
         const currentUser = auth.currentUser;
         if (!currentUser) return alert("Please log in.");
         
@@ -652,19 +677,17 @@
         if (qty < minQty) {
             errorPopup.textContent = `Min order: ${minQty}`;
             errorPopup.style.display = 'block';
-            errorPopup.scrollIntoView({ behavior: 'smooth' });
+            errorPopup.scrollIntoView({ behavior: 'smooth', block: 'center' });
             return;
         }
 
         if (qty > maxQty) {
             errorPopup.textContent = `Max order: ${maxQty}`;
             errorPopup.style.display = 'block';
-            errorPopup.scrollIntoView({ behavior: 'smooth' });
+            errorPopup.scrollIntoView({ behavior: 'smooth', block: 'center' });
             return;
         }
         
-        errorPopup.style.display = 'none';
-
         const ratePerThousand = (+serviceData.rate || 0);
         const amount = +(qty * (ratePerThousand / 1000)).toFixed(2);
         const userRef = db.ref('users/' + currentUser.uid);
@@ -683,7 +706,13 @@
                 const payload = { user: currentUser.uid, email: currentUser.email, category: selectedCategory, service: selectedService, link: link, qty: qty, amount: amount, status: "Pending", time: Date.now() };
                 db.ref("orders/" + orderId).set(payload)
                 .then(() => {
-                    alert("✅ Order placed successfully!");
+                    successPopup.innerHTML = `<strong>✅ Order Placed Successfully!</strong>
+                                              <p><strong>Service:</strong> ${payload.service}</p>
+                                              <p><strong>Link:</strong> ${payload.link}</p>
+                                              <p><strong>Quantity:</strong> ${payload.qty}</p>
+                                              <p><strong>Charge:</strong> ₹${payload.amount.toFixed(2)}</p>`;
+                    successPopup.style.display = 'block';
+                    successPopup.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     document.getElementById("link").value = '';
                 })
                 .catch(() => {
