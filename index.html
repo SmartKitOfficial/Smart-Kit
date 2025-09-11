@@ -92,20 +92,8 @@
     .child-panel-history th, .child-panel-history td { padding: 10px; text-align: center; border-bottom: 1px solid #d1d5db; color: var(--cp-text); }
     .child-panel-history th { font-weight: bold; }
     #order-error-popup { background-color: #ffebee; color: #c62828; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; font-weight: bold; display: none; }
-    
-    /* --- NEW SUCCESS POPUP STYLE --- */
-    #order-success-popup {
-        background-color: #e8f5e9;
-        color: #2e7d32;
-        padding: 15px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        font-size: 14px;
-        line-height: 1.6;
-        text-align: left;
-    }
+    #order-success-popup { background-color: #e8f5e9; color: #2e7d32; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; line-height: 1.6; text-align: left; }
     #order-success-popup p { margin: 4px 0; }
-
     .whatsapp-btn { position:fixed; width:55px; height:55px; bottom:20px; right:20px; background:#25D366; color:#fff; border-radius:50%; text-align:center; font-size:28px; box-shadow:0 4px 8px rgba(0,0,0,.3); z-index:9999; line-height:55px; text-decoration:none; }
   </style>
 </head>
@@ -335,6 +323,7 @@
         } 
     });
     
+    let categoryOrder = []; // Global variable for category order
     db.ref("settings").on("value", snap => { 
         const s = snap.val() || {}; const texts = s.siteTexts || {}; const theme = s.theme || {};
         const cpTheme = theme.childPanel || {};
@@ -365,6 +354,8 @@
         root.style.setProperty('--cp-input-bg', cpTheme.inputBg || '#f7fee7');
         root.style.setProperty('--cp-btn-bg', cpTheme.btnBg || '#84cc16');
         root.style.setProperty('--cp-btn-active-bg', cpTheme.btnActiveBg || '#65a30d');
+        
+        categoryOrder = s.categoryOrder || []; // Store category order
 
         document.getElementById('panelOrders').textContent = s.panelOrders || 0; 
         if(s.whatsappLink) document.getElementById("waFloat").href = s.whatsappLink; 
@@ -441,7 +432,7 @@
                 })
                 .catch(() => {
                     alert("🔴 Critical Error: Balance deducted, but order failed. Refunding.");
-                    userRef.transaction(userData => { if(userData) { userData.balance += cost; userData.spent -= amount; } return userData; });
+                    userRef.transaction(userData => { if(userData) { userData.balance += cost; userData.spent -= cost; } return userData; });
                 });
             }
         }).catch(error => alert("🔴 Order Error: " + error.message));
@@ -514,7 +505,7 @@
 
     function hideOrderPopups() {
         document.getElementById('order-error-popup').style.display = 'none';
-        document.getElementById('order-success-popup').style.display = 'none';
+        document.getElementById('order-success-popup').classList.add('hidden');
     }
 
     function initCustomDropdowns() {
@@ -537,20 +528,39 @@
         initCustomDropdowns();
     });
 
+    const illegalChars = { '.': '%2E', '$': '%24', '#': '%23', '[': '%5B', ']': '%5D', '/': '%2F' };
+    const legalChars = { '%2E': '.', '%24': '$', '%23': '#', '%5B': '[', '%5D': ']', '%2F': '/' };
+    function decodeFirebaseKey(text) { return text.replace(/%[0-9A-F]{2}/g, match => legalChars[match] || match); }
+    
     function populateCategories(){
         const optionsContainer = document.getElementById('categoryOptions');
         optionsContainer.innerHTML = "";
-        const catNames = Object.keys(servicesData);
         
-        catNames.forEach(catName => {
+        const availableCats = Object.keys(servicesData);
+        let sortedCats = [];
+        if (categoryOrder && categoryOrder.length > 0) {
+          categoryOrder.forEach(catKey => {
+            if (availableCats.includes(catKey)) {
+              sortedCats.push(catKey);
+            }
+          });
+        }
+        availableCats.forEach(catKey => {
+          if (!sortedCats.includes(catKey)) {
+            sortedCats.push(catKey);
+          }
+        });
+
+        sortedCats.forEach(catKey => {
+            const catName = decodeFirebaseKey(catKey);
             const optEl = document.createElement('div');
             optEl.className = 'custom-option';
             optEl.innerHTML = catName;
-            optEl.dataset.value = catName;
+            optEl.dataset.value = catKey;
             optEl.addEventListener('click', () => {
                 hideOrderPopups();
                 document.getElementById('search').value = '';
-                selectedCategory = catName;
+                selectedCategory = catKey;
                 document.getElementById('categoryValue').innerHTML = catName;
                 selectedService = null;
                 document.getElementById('serviceValue').innerHTML = 'Select a service...';
@@ -560,9 +570,9 @@
             optionsContainer.appendChild(optEl);
         });
 
-        if (!selectedCategory && catNames.length > 0) {
-            selectedCategory = catNames[0];
-            document.getElementById('categoryValue').innerHTML = selectedCategory;
+        if (!selectedCategory && sortedCats.length > 0) {
+            selectedCategory = sortedCats[0];
+            document.getElementById('categoryValue').innerHTML = decodeFirebaseKey(selectedCategory);
             populateServices(true);
         }
     }
@@ -576,22 +586,23 @@
         let servicesToShow = [];
 
         if (query) {
-            Object.keys(servicesData).forEach(catName => {
-                Object.keys(servicesData[catName]).forEach(servName => {
+            Object.keys(servicesData).forEach(catKey => {
+                Object.keys(servicesData[catKey]).forEach(servKey => {
+                    const servName = decodeFirebaseKey(servKey);
                     if (servName.toLowerCase().includes(query)) {
-                        servicesToShow.push({ name: servName, category: catName });
+                        servicesToShow.push({ key: servKey, name: servName, category: catKey });
                     }
                 });
             });
         } else if (selectedCategory && servicesData[selectedCategory]) {
-            servicesToShow = Object.keys(servicesData[selectedCategory]).map(servName => ({
-                name: servName, category: selectedCategory
+            servicesToShow = Object.keys(servicesData[selectedCategory]).map(servKey => ({
+                key: servKey, name: decodeFirebaseKey(servKey), category: selectedCategory
             }));
         }
 
         servicesToShow.forEach(serviceInfo => {
-            const { name: servName, category: catName } = serviceInfo;
-            const serviceData = servicesData[catName][servName];
+            const { key: servKey, name: servName, category: catKey } = serviceInfo;
+            const serviceData = servicesData[catKey][servKey];
             const optEl = document.createElement('div');
             optEl.className = 'custom-option';
             const idMatch = servName.match(/^(\d+)\s*-\s*/);
@@ -606,9 +617,9 @@
             
             optEl.addEventListener('click', () => {
                 hideOrderPopups();
-                selectedCategory = catName;
-                selectedService = servName;
-                document.getElementById('categoryValue').innerHTML = selectedCategory;
+                selectedCategory = catKey;
+                selectedService = servKey;
+                document.getElementById('categoryValue').innerHTML = decodeFirebaseKey(selectedCategory);
                 const truncatedName = servName.length > 35 ? servName.substring(0, 35) + '...' : servName;
                 document.getElementById('serviceValue').innerHTML = `<span class="service-id-badge-trigger">${serviceId}</span> ${truncatedName}`;
                 document.getElementById('serviceWrapper').classList.remove('open');
@@ -620,11 +631,11 @@
         if (autoSelectFirst && servicesToShow.length > 0) {
             const firstService = servicesToShow[0];
             selectedCategory = firstService.category;
-            selectedService = firstService.name;
-            document.getElementById('categoryValue').innerHTML = selectedCategory;
-            const idMatch = selectedService.match(/^(\d+)\s*-\s*/);
+            selectedService = firstService.key;
+            document.getElementById('categoryValue').innerHTML = decodeFirebaseKey(selectedCategory);
+            const idMatch = firstService.name.match(/^(\d+)\s*-\s*/);
             const serviceId = idMatch ? idMatch[1] : '●';
-            const truncatedName = selectedService.length > 35 ? selectedService.substring(0, 35) + '...' : selectedService;
+            const truncatedName = firstService.name.length > 35 ? firstService.name.substring(0, 35) + '...' : firstService.name;
             document.getElementById('serviceValue').innerHTML = `<span class="service-id-badge-trigger">${serviceId}</span> ${truncatedName}`;
             updateServiceDetails();
         } else if (!selectedService) {
@@ -658,11 +669,10 @@
         document.getElementById("totalPrice").value = "₹" + total.toFixed(3);
     }
     
-    // === MODIFIED placeOrder FUNCTION with SCROLL and SUCCESS POPUP ===
     function placeOrder(){
         const errorPopup = document.getElementById('order-error-popup');
         const successPopup = document.getElementById('order-success-popup');
-        hideOrderPopups(); // Hide any old messages
+        hideOrderPopups();
         const currentUser = auth.currentUser;
         if (!currentUser) return alert("Please log in.");
         
@@ -707,11 +717,11 @@
                 db.ref("orders/" + orderId).set(payload)
                 .then(() => {
                     successPopup.innerHTML = `<strong>✅ Order Placed Successfully!</strong>
-                                              <p><strong>Service:</strong> ${payload.service}</p>
+                                              <p><strong>Service:</strong> ${decodeFirebaseKey(payload.service)}</p>
                                               <p><strong>Link:</strong> ${payload.link}</p>
                                               <p><strong>Quantity:</strong> ${payload.qty}</p>
                                               <p><strong>Charge:</strong> ₹${payload.amount.toFixed(2)}</p>`;
-                    successPopup.style.display = 'block';
+                    successPopup.classList.remove('hidden');
                     successPopup.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     document.getElementById("link").value = '';
                 })
