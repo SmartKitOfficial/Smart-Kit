@@ -294,11 +294,11 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth(); const db = firebase.database();
 
+    function login(){ const email=document.getElementById('email').value; const pass=document.getElementById('password').value; if(!email || !pass) return alert("Please enter email and password."); auth.signInWithEmailAndPassword(email,pass).then(userCred => { db.ref('users/' + userCred.user.uid).update({ lastLogin: Date.now() }); }).catch(e=>alert(e.message)); }
+    function googleLogin(){ const provider=new firebase.auth.GoogleAuthProvider(); auth.signInWithPopup(provider).then(result=>{ const user=result.user; db.ref("users/"+user.uid).once("value").then(snap=>{ const updates = { email: user.email, lastLogin: Date.now() }; if(!snap.exists()){ updates.balance = 0; updates.spent = 0; updates.joined = Date.now(); } db.ref("users/"+user.uid).update(updates); }); }).catch(e=>alert(e.message)); }
     function showSignUp(){ document.getElementById("loginCard").classList.add("hidden"); document.getElementById("signUpCard").classList.remove("hidden"); }
     function showLogin(){ document.getElementById("signUpCard").classList.add("hidden"); document.getElementById("loginCard").classList.remove("hidden"); }
-    function login(){ const email=document.getElementById('email').value; const pass=document.getElementById('password').value; if(!email || !pass) return alert("Please enter email and password."); auth.signInWithEmailAndPassword(email,pass).catch(e=>alert(e.message)); }
-    function register(){ const email=document.getElementById('signUpEmail').value; const pass=document.getElementById('signUpPassword').value; if(!email||!pass) return alert("Please enter all details."); auth.createUserWithEmailAndPassword(email,pass).then(cred => { return db.ref("users/"+cred.user.uid).set({ email: email, balance: 0, spent: 0, joined: Date.now() }); }).then(() => { alert("Account created! Please login."); showLogin(); }).catch(e=>alert(e.message)); }
-    function googleLogin(){ const provider=new firebase.auth.GoogleAuthProvider(); auth.signInWithPopup(provider).then(result=>{ const user=result.user; db.ref("users/"+user.uid).once("value").then(snap=>{ if(!snap.exists()){ db.ref("users/"+user.uid).set({email:user.email,balance:0,spent:0,joined:Date.now()}); } }); }).catch(e=>alert(e.message)); }
+    function register(){ const email=document.getElementById('signUpEmail').value; const pass=document.getElementById('signUpPassword').value; if(!email||!pass) return alert("Please enter all details."); auth.createUserWithEmailAndPassword(email,pass).then(cred => { return db.ref("users/"+cred.user.uid).set({ email: email, balance: 0, spent: 0, joined: Date.now(), lastLogin: Date.now() }); }).then(() => { alert("Account created! Please login."); showLogin(); }).catch(e=>alert(e.message)); }
     function forgotPassword(){ const email=document.getElementById('email').value; if(!email) return alert("Enter your email first."); auth.sendPasswordResetEmail(email).then(()=>alert("Password reset email sent!")).catch(e=>alert(e.message)); }
     function logout(){ if (confirm("Are you sure you want to logout?")) { auth.signOut(); } }
     
@@ -323,7 +323,7 @@
         } 
     });
     
-    let categoryOrder = []; // Global variable for category order
+    let categoryOrder = [];
     db.ref("settings").on("value", snap => { 
         const s = snap.val() || {}; const texts = s.siteTexts || {}; const theme = s.theme || {};
         const cpTheme = theme.childPanel || {};
@@ -355,8 +355,7 @@
         root.style.setProperty('--cp-btn-bg', cpTheme.btnBg || '#84cc16');
         root.style.setProperty('--cp-btn-active-bg', cpTheme.btnActiveBg || '#65a30d');
         
-        categoryOrder = s.categoryOrder || []; // Store category order
-
+        categoryOrder = s.categoryOrder || [];
         document.getElementById('panelOrders').textContent = s.panelOrders || 0; 
         if(s.whatsappLink) document.getElementById("waFloat").href = s.whatsappLink; 
         if(s.qrCodeUrl) document.getElementById('qrCodeImage').src = s.qrCodeUrl; 
@@ -496,8 +495,8 @@
 
     function verifyTxn(){ const u = auth.currentUser; if (!u) return alert("Please log in."); const utr = document.getElementById('utr').value.trim(); const amt = document.getElementById('amount').value.trim(); if(!utr || !amt || +amt <= 0) return alert("⚠️ Please enter valid UTR & Amount"); const txnId = "txn_" + Date.now(); const payload = { user: u.uid, email: u.email, utr: utr, amount: +amt, status: "Pending", time: Date.now() }; db.ref("transactions/" + txnId).set(payload).then(() => { alert("✅ Request submitted!"); showDashboard(); }).catch(err => alert("Error: " + err.message)); }
     function submitSupportTicket() { const u = auth.currentUser; if (!u) return alert("Please log in."); const subject = document.getElementById('ticketSubject').value; const orderId = document.getElementById('ticketOrderId').value.trim(); const request = document.getElementById('ticketRequest').value; const message = document.getElementById('ticketMessage').value.trim(); if (!message) return alert("Please enter a message."); if (subject === 'Order' && !orderId) return alert("Please enter Order ID."); const ticketId = "t_" + Date.now(); const payload = { user: u.uid, email: u.email, subject, orderId, request, message, status: "Open", time: Date.now() }; db.ref("tickets/" + ticketId).set(payload).then(() => { alert("✅ Ticket submitted!"); showDashboard(); }).catch(err => alert("Error: " + err.message)); }
-    function fetchUserOrders() { const u = auth.currentUser; if (!u) return; const cont = document.getElementById('ordersListContainer'); cont.innerHTML = '<p>Loading...</p>'; db.ref('orders').orderByChild('user').equalTo(u.uid).on('value', (snap) => { if (snap.exists()) { const data = snap.val(); let html = Object.keys(data).map(k => {const o=data[k]; const d=new Date(o.time).toLocaleString(); const s=o.status?o.status.toLowerCase().replace(' ','-'):'pending'; return `<div class="order-card status-${s}"><span class="order-status status-${s}">${o.status}</span><p><strong>Service:</strong> ${o.service}</p><p><strong>Link:</strong> ${o.link}</p><p><strong>Qty:</strong> ${o.qty}</p><p><strong>Amount:</strong> ₹${o.amount.toFixed(2)}</p><p><strong>Date:</strong> ${d}</p></div>`;}).reverse().join(''); cont.innerHTML = html; } else { cont.innerHTML = '<p>No orders yet.</p>'; } }); }
-    function renderServicesList() { const cont = document.getElementById('servicesListContainer'); if (!servicesData || Object.keys(servicesData).length === 0) { cont.innerHTML = '<p>No services available.</p>'; return; } let html = ''; for (const cat in servicesData) { html += `<button class="category-accordion">${cat}</button><div class="services-panel">`; for (const name in servicesData[cat]) { const s = servicesData[cat][name]; const rate = parseFloat(s.rate||0).toFixed(2); html += `<div class="service-item"><p>${name}</p><span>₹${rate}</span></div>`; } html += `</div>`; } cont.innerHTML = html; document.querySelectorAll('.category-accordion').forEach(b => { b.addEventListener('click', () => { b.classList.toggle('active'); const p = b.nextElementSibling; p.style.maxHeight = p.style.maxHeight ? null : p.scrollHeight + "px"; }); }); }
+    function fetchUserOrders() { const u = auth.currentUser; if (!u) return; const cont = document.getElementById('ordersListContainer'); cont.innerHTML = '<p>Loading...</p>'; db.ref('orders').orderByChild('user').equalTo(u.uid).on('value', (snap) => { if (snap.exists()) { const data = snap.val(); let html = Object.keys(data).map(k => {const o=data[k]; const d=new Date(o.time).toLocaleString(); const s=o.status?o.status.toLowerCase().replace(' ','-'):'pending'; return `<div class="order-card status-${s}"><span class="order-status status-${s}">${o.status}</span><p><strong>Service:</strong> ${decodeFirebaseKey(o.service)}</p><p><strong>Link:</strong> ${o.link}</p><p><strong>Qty:</strong> ${o.qty}</p><p><strong>Amount:</strong> ₹${o.amount.toFixed(2)}</p><p><strong>Date:</strong> ${d}</p></div>`;}).reverse().join(''); cont.innerHTML = html; } else { cont.innerHTML = '<p>No orders yet.</p>'; } }); }
+    function renderServicesList() { const cont = document.getElementById('servicesListContainer'); if (!servicesData || Object.keys(servicesData).length === 0) { cont.innerHTML = '<p>No services available.</p>'; return; } let html = ''; for (const cat in servicesData) { html += `<button class="category-accordion">${decodeFirebaseKey(cat)}</button><div class="services-panel">`; for (const name in servicesData[cat]) { const s = servicesData[cat][name]; const rate = parseFloat(s.rate||0).toFixed(2); html += `<div class="service-item"><p>${decodeFirebaseKey(name)}</p><span>₹${rate}</span></div>`; } html += `</div>`; } cont.innerHTML = html; document.querySelectorAll('.category-accordion').forEach(b => { b.addEventListener('click', () => { b.classList.toggle('active'); const p = b.nextElementSibling; p.style.maxHeight = p.style.maxHeight ? null : p.scrollHeight + "px"; }); }); }
     
     let servicesData = {};
     let selectedCategory = null;
@@ -508,6 +507,10 @@
         document.getElementById('order-success-popup').classList.add('hidden');
     }
 
+    const illegalChars = { '.': '%2E', '$': '%24', '#': '%23', '[': '%5B', ']': '%5D', '/': '%2F' };
+    const legalChars = { '%2E': '.', '%24': '$', '%23': '#', '%5B': '[', '%5D': ']', '%2F': '/' };
+    function decodeFirebaseKey(text) { return text.replace(/%[0-9A-F]{2}/g, match => legalChars[match] || match); }
+    
     function initCustomDropdowns() {
         ['category', 'service'].forEach(type => {
             const wrapper = document.getElementById(`${type}Wrapper`);
@@ -528,10 +531,6 @@
         initCustomDropdowns();
     });
 
-    const illegalChars = { '.': '%2E', '$': '%24', '#': '%23', '[': '%5B', ']': '%5D', '/': '%2F' };
-    const legalChars = { '%2E': '.', '%24': '$', '%23': '#', '%5B': '[', '%5D': ']', '%2F': '/' };
-    function decodeFirebaseKey(text) { return text.replace(/%[0-9A-F]{2}/g, match => legalChars[match] || match); }
-    
     function populateCategories(){
         const optionsContainer = document.getElementById('categoryOptions');
         optionsContainer.innerHTML = "";
