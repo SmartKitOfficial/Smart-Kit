@@ -35,13 +35,15 @@
     .form-box .submit-btn:hover { opacity: 0.9; }
     .form-box > label { display:none; }
     .custom-select-wrapper { position: relative; user-select: none; }
-    .custom-select-trigger { background-color: #f0f8ff; border: 1px solid #e0f2f1; border-radius: 12px; padding: 14px; font-size: 15px; cursor: pointer; position: relative; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .custom-select-trigger { background-color: #f0f8ff; border: 1px solid #e0f2f1; border-radius: 12px; padding: 14px; font-size: 15px; cursor: pointer; position: relative; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; }
+    .custom-select-trigger img { width: 20px; height: 20px; margin-right: 10px; }
     .custom-select-trigger::after { content: '▼'; font-size: 10px; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #888; transition: transform 0.2s; }
     .custom-select-wrapper.open .custom-select-trigger::after { transform: translateY(-50%) rotate(180deg); }
     .custom-options { display: none; background-color: var(--card-bg); border-radius: 12px; margin-top: 5px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-height: 250px; overflow-y: auto; z-index: 10; position: relative; }
     .custom-select-wrapper.open .custom-options { display: block; }
-    .custom-option { padding: 12px 15px; cursor: pointer; transition: background-color 0.2s; display: flex; align-items: flex-start; gap: 10px; }
+    .custom-option { padding: 12px 15px; cursor: pointer; transition: background-color 0.2s; display: flex; align-items: center; gap: 10px; }
     .custom-option:hover { background-color: #f0f8ff; }
+    .custom-option img { width: 20px; height: 20px; }
     .service-id-badge { background-color: #6c757d; color: white; padding: 4px 8px; border-radius: 8px; font-size: 13px; font-weight: bold; flex-shrink: 0; line-height: 1.4; }
     .service-content { display: flex; flex-direction: column; }
     .service-name { font-size: 14px; color: var(--main-text); line-height: 1.4; word-break: break-word; }
@@ -60,7 +62,9 @@
     .add-balance-form input { background: #fff; border: 1px solid #ddd; border-radius: 12px; padding: 14px; margin-bottom: 15px; width: 100%; box-sizing: border-box; }
     .verify-btn { background: #007bff; color: #fff; width: 100%; border-radius: 12px; padding: 14px; font-weight: bold; border: none; font-size: 16px; cursor: pointer; }
     .order-card { background: #ffffff; margin-bottom: 12px; padding: 15px; border-radius: 8px; text-align: left; box-shadow: 0 1px 4px rgba(0,0,0,0.08); border-left: 5px solid #03a9f4; position: relative; } .order-card p { margin: 5px 0; font-size: 14px; word-wrap: break-word; } .order-card p strong { color: #333; } .order-status { position: absolute; top: 15px; right: 15px; padding: 4px 12px; border-radius: 15px; color: #fff; font-size: 12px; font-weight: bold; text-transform: capitalize; } .status-pending { background-color: #ff9800; } .order-card.status-pending { border-left-color: #ff9800; } .status-completed { background-color: #4caf50; } .order-card.status-completed { border-left-color: #4caf50; } .status-processing, .status-in-progress { background-color: #2196f3; } .order-card.status-processing, .order-card.status-in-progress { border-left-color: #2196f3; } .status-canceled, .status-refunded { background-color: #f44336; } .order-card.status-canceled, .order-card.status-refunded { border-left-color: #f44336; }
-    .category-accordion { background-color: #03a9f4; color: white; cursor: pointer; padding: 15px; width: 100%; border: none; text-align: left; outline: none; font-size: 16px; transition: 0.4s; border-radius: 8px; margin-top: 10px; } .category-accordion:after { content: '\\002B'; color: white; font-weight: bold; float: right; margin-left: 5px; } .category-accordion.active:after { content: "\\2212"; } .category-accordion:hover { background-color: #0288d1; } .services-panel { padding: 0 18px; background-color: white; max-height: 0; overflow: hidden; transition: max-height 0.2s ease-out; border-radius: 0 0 8px 8px; } .service-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; text-align: left; } .service-item:last-child { border-bottom: none; } .service-item p { margin: 0; font-size: 14px; flex-grow: 1; } .service-item span { font-size: 13px; color: #555; margin-left: 15px; white-space: nowrap; }
+    .category-accordion { background-color: #03a9f4; color: white; cursor: pointer; padding: 15px; width: 100%; border: none; text-align: left; outline: none; font-size: 16px; transition: 0.4s; border-radius: 8px; margin-top: 10px; display: flex; align-items: center; } 
+    .category-accordion img { width: 20px; height: 20px; margin-right: 10px; }
+    .category-accordion:after { content: '\\002B'; color: white; font-weight: bold; float: right; margin-left: auto; } .category-accordion.active:after { content: "\\2212"; } .category-accordion:hover { background-color: #0288d1; } .services-panel { padding: 0 18px; background-color: white; max-height: 0; overflow: hidden; transition: max-height 0.2s ease-out; border-radius: 0 0 8px 8px; } .service-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; text-align: left; } .service-item:last-child { border-bottom: none; } .service-item p { margin: 0; font-size: 14px; flex-grow: 1; } .service-item span { font-size: 13px; color: #555; margin-left: 15px; white-space: nowrap; }
     #accountScreen { background: linear-gradient(to bottom, #fde047, #a3e635); padding: 20px; box-sizing: border-box; }
     .account-form-container { max-width: 500px; margin: 0 auto; }
     .account-form-container .input-group { margin-bottom: 15px; }
@@ -499,17 +503,18 @@
     function renderServicesList() { const cont = document.getElementById('servicesListContainer'); if (!servicesData || Object.keys(servicesData).length === 0) { cont.innerHTML = '<p>No services available.</p>'; return; } let html = ''; for (const cat in servicesData) { html += `<button class="category-accordion">${decodeFirebaseKey(cat)}</button><div class="services-panel">`; for (const name in servicesData[cat]) { const s = servicesData[cat][name]; const rate = parseFloat(s.rate||0).toFixed(2); html += `<div class="service-item"><p>${decodeFirebaseKey(name)}</p><span>₹${rate}</span></div>`; } html += `</div>`; } cont.innerHTML = html; document.querySelectorAll('.category-accordion').forEach(b => { b.addEventListener('click', () => { b.classList.toggle('active'); const p = b.nextElementSibling; p.style.maxHeight = p.style.maxHeight ? null : p.scrollHeight + "px"; }); }); }
     
     let servicesData = {};
+    let categoryData = {};
     let selectedCategory = null;
     let selectedService = null;
-
-    function hideOrderPopups() {
-        document.getElementById('order-error-popup').style.display = 'none';
-        document.getElementById('order-success-popup').classList.add('hidden');
-    }
 
     const illegalChars = { '.': '%2E', '$': '%24', '#': '%23', '[': '%5B', ']': '%5D', '/': '%2F' };
     const legalChars = { '%2E': '.', '%24': '$', '%23': '#', '%5B': '[', '%5D': ']', '%2F': '/' };
     function decodeFirebaseKey(text) { return text.replace(/%[0-9A-F]{2}/g, match => legalChars[match] || match); }
+    
+    function hideOrderPopups() {
+        document.getElementById('order-error-popup').style.display = 'none';
+        document.getElementById('order-success-popup').classList.add('hidden');
+    }
     
     function initCustomDropdowns() {
         ['category', 'service'].forEach(type => {
@@ -524,8 +529,10 @@
         window.addEventListener('click', () => document.querySelectorAll('.custom-select-wrapper').forEach(w => w.classList.remove('open')));
     }
     
-    db.ref("services").on("value", snap => { 
-        servicesData = snap.val() || {}; 
+    db.ref().on("value", snap => { 
+        const data = snap.val() || {};
+        servicesData = data.services || {}; 
+        categoryData = data.categories || {};
         populateCategories(); 
         renderServicesList(); 
         initCustomDropdowns();
@@ -552,15 +559,16 @@
 
         sortedCats.forEach(catKey => {
             const catName = decodeFirebaseKey(catKey);
+            const iconUrl = categoryData[catKey]?.iconUrl;
             const optEl = document.createElement('div');
             optEl.className = 'custom-option';
-            optEl.innerHTML = catName;
+            optEl.innerHTML = (iconUrl ? `<img src="${iconUrl}" alt="">` : '') + catName;
             optEl.dataset.value = catKey;
             optEl.addEventListener('click', () => {
                 hideOrderPopups();
                 document.getElementById('search').value = '';
                 selectedCategory = catKey;
-                document.getElementById('categoryValue').innerHTML = catName;
+                document.getElementById('categoryValue').innerHTML = (iconUrl ? `<img src="${iconUrl}" alt="">` : '') + catName;
                 selectedService = null;
                 document.getElementById('serviceValue').innerHTML = 'Select a service...';
                 document.getElementById('categoryWrapper').classList.remove('open');
@@ -571,7 +579,9 @@
 
         if (!selectedCategory && sortedCats.length > 0) {
             selectedCategory = sortedCats[0];
-            document.getElementById('categoryValue').innerHTML = decodeFirebaseKey(selectedCategory);
+            const catName = decodeFirebaseKey(selectedCategory);
+            const iconUrl = categoryData[selectedCategory]?.iconUrl;
+            document.getElementById('categoryValue').innerHTML = (iconUrl ? `<img src="${iconUrl}" alt="">` : '') + catName;
             populateServices(true);
         }
     }
@@ -618,7 +628,9 @@
                 hideOrderPopups();
                 selectedCategory = catKey;
                 selectedService = servKey;
-                document.getElementById('categoryValue').innerHTML = decodeFirebaseKey(selectedCategory);
+                const catName = decodeFirebaseKey(selectedCategory);
+                const iconUrl = categoryData[selectedCategory]?.iconUrl;
+                document.getElementById('categoryValue').innerHTML = (iconUrl ? `<img src="${iconUrl}" alt="">` : '') + catName;
                 const truncatedName = servName.length > 35 ? servName.substring(0, 35) + '...' : servName;
                 document.getElementById('serviceValue').innerHTML = `<span class="service-id-badge-trigger">${serviceId}</span> ${truncatedName}`;
                 document.getElementById('serviceWrapper').classList.remove('open');
@@ -631,7 +643,9 @@
             const firstService = servicesToShow[0];
             selectedCategory = firstService.category;
             selectedService = firstService.key;
-            document.getElementById('categoryValue').innerHTML = decodeFirebaseKey(selectedCategory);
+            const catName = decodeFirebaseKey(selectedCategory);
+            const iconUrl = categoryData[selectedCategory]?.iconUrl;
+            document.getElementById('categoryValue').innerHTML = (iconUrl ? `<img src="${iconUrl}" alt="">` : '') + catName;
             const idMatch = firstService.name.match(/^(\d+)\s*-\s*/);
             const serviceId = idMatch ? idMatch[1] : '●';
             const truncatedName = firstService.name.length > 35 ? firstService.name.substring(0, 35) + '...' : firstService.name;
