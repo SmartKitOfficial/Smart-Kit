@@ -8,6 +8,7 @@
     :root { 
         --main-bg: #fcd34d; --main-text: #333333; --header-bg: #fcd34d; --header-text: #333333; --btn-bg: #4db6ac; --btn-text: #ffffff; --card-bg: #ffffff; --card-text: #555555; --grad-start: #6d28d9; --grad-end: #4f46e5;
         --cp-grad-start: #fde047; --cp-grad-end: #a3e635; --cp-container-bg: rgba(255, 255, 255, 0.8); --cp-text: #3f6212; --cp-input-bg: #f7fee7; --cp-btn-bg: #84cc16; --cp-btn-active-bg: #65a30d;
+        --api-bg: #f8f9fa; --api-text: #212529; --api-heading: #007bff; --api-code-bg: #282c34; --api-code-text: #abb2bf; --api-table-head-bg: #e9ecef;
     }
     body { margin:0; font-family: Arial, sans-serif; background: var(--main-bg); color: var(--main-text); overflow-x:hidden; } .hidden { display:none; }
     .login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px; background:#06b6d4;} .login-card{background:#fff;padding:30px 25px;border-radius:12px;width:100%;max-width:350px;box-shadow:0 6px 20px rgba(0,0,0,.15)} .login-card h2{margin:0 0 10px;font-size:20px;text-align:center;color:#111} .login-card p{font-size:13px;text-align:center;color:#444;margin-bottom:20px;line-height:1.4} .login-card label{font-weight:bold;font-size:13px;margin-top:12px;display:block} .login-card input{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;margin-top:6px;font-size:14px; box-sizing: border-box;} .login-card .row{display:flex;align-items:center;justify-content:space-between;margin-top:10px} .login-card .row label{font-weight:normal;font-size:13px} .login-card .row a{font-size:13px;color:#0366d6;text-decoration:none} .login-card .btn{width:100%;padding:12px;background:#10b981;border:none;border-radius:8px;font-size:15px;color:#fff;cursor:pointer;margin-top:18px} .login-card .btn:hover{background:#059669} .login-card .gbtn{width:100%;padding:12px;background:#f1f5f9;border:none;border-radius:8px;font-size:15px;color:#333;cursor:pointer;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px} .login-card .gbtn img{width:20px} .login-card .signup{text-align:center;font-size:13px;margin-top:14px} .login-card .signup a{color:#0366d6;text-decoration:none;cursor:pointer}
@@ -98,13 +99,24 @@
     #order-error-popup { background-color: #ffebee; color: #c62828; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; font-weight: bold; display: none; }
     #order-success-popup { background-color: #e8f5e9; color: #2e7d32; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; line-height: 1.6; text-align: left; }
     #order-success-popup p { margin: 4px 0; }
+    #apiScreen { background-color: var(--api-bg); color: var(--api-text); padding: 25px; text-align: left;}
+    .api-container { max-width: 800px; margin: 0 auto; }
+    .api-container h2 { font-size: 28px; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-bottom: 20px; color: var(--api-heading); }
+    .api-container h3 { font-size: 20px; margin-top: 30px; margin-bottom: 15px; color: var(--api-heading); }
+    .api-info, .api-section { background-color: #fff; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+    .api-info table { table-layout: auto; }
+    .api-info td:first-child { font-weight: bold; width: 30%; }
+    .api-info code { background-color: #e9ecef; padding: 2px 5px; border-radius: 4px; }
+    .api-section table { table-layout: auto; }
+    .api-section th { background-color: var(--api-table-head-bg); }
+    .api-section pre { background-color: var(--api-code-bg); color: var(--api-code-text); padding: 15px; border-radius: 8px; white-space: pre-wrap; word-wrap: break-word; font-family: monospace; }
     .whatsapp-btn { position:fixed; width:55px; height:55px; bottom:20px; right:20px; background:#25D366; color:#fff; border-radius:50%; text-align:center; font-size:28px; box-shadow:0 4px 8px rgba(0,0,0,.3); z-index:9999; line-height:55px; text-decoration:none; }
   </style>
 </head>
 <body>
   <div id="loginScreen"> <div class="login-wrap"> <div class="login-card" id="loginCard"><h2>SMART KIT LOGIN</h2><p>Welcome back! Please sign in.</p><label>Email / Username</label><input type="text" id="email" placeholder="Enter your email"/><label>Password</label><input type="password" id="password" placeholder="Enter your password"/><div class="row"><label><input type="checkbox" id="rememberMe"> Remember me</label><a href="#" onclick="forgotPassword()">Forgot password?</a></div><button class="btn" onclick="login()">Sign in</button><button class="gbtn" onclick="googleLogin()"><img src="https://developers.google.com/identity/images/g-logo.png" alt="Google Logo"/> Login with Google</button><div class="signup">Do not have an account? <a onclick="showSignUp()">Sign up</a></div></div> <div class="login-card hidden" id="signUpCard"><h2>Create Account</h2><p>Join us today. It's free!</p><label>Email</label><input type="text" id="signUpEmail" placeholder="Enter your email"/><label>Password</label><input type="password" id="signUpPassword" placeholder="Enter your password"/><button class="btn" onclick="register()">Sign up</button><div class="signup">Already have an account? <a onclick="showLogin()">Login</a></div></div> </div> </div>
   <div id="panelScreen" class="hidden"> <div class="header"><span>SMART KIT</span><span class="menu-btn" onclick="openMenu()">☰</span></div>
-    <div id="sidebar" class="sidebar"> <div class="sidebar-balance"><span>₹ <span id="sidebarBalance">0.00</span></span><span class="close-btn" onclick="closeMenu()">×</span></div> <a onclick="showDashboard()">🛍️ New Order</a> <a onclick="showOrdersScreen()">📄 Orders</a> <a onclick="showServicesScreen()">🛠️ Services</a> <a onclick="showAddBalanceScreen()">💳 Add Funds</a> <a onclick="showSupportScreen()">🎧 Support</a> <a onclick="showChildPanelScreen()">👨‍👦 Child Panel</a><a>👥 Affiliate</a><a>🔗 API</a><a>💸 Transfer Funds</a><a>📰 blogs</a> <a onclick="showAccountScreen()">👤 Account</a> <a>📜 Rules</a> <a onclick="logout()">↪️ Logout</a> </div>
+    <div id="sidebar" class="sidebar"> <div class="sidebar-balance"><span>₹ <span id="sidebarBalance">0.00</span></span><span class="close-btn" onclick="closeMenu()">×</span></div> <a onclick="showDashboard()">🛍️ New Order</a> <a onclick="showOrdersScreen()">📄 Orders</a> <a onclick="showServicesScreen()">🛠️ Services</a> <a onclick="showAddBalanceScreen()">💳 Add Funds</a> <a onclick="showSupportScreen()">🎧 Support</a> <a onclick="showChildPanelScreen()">👨‍👦 Child Panel</a><a onclick="showApiScreen()">🔗 API</a><a>💸 Transfer Funds</a><a>📰 blogs</a> <a onclick="showAccountScreen()">👤 Account</a> <a>📜 Rules</a> <a onclick="logout()">↪️ Logout</a> </div>
     
     <div id="home">
       <div class="welcome-banner">
@@ -287,6 +299,157 @@
         </div>
     </div>
 
+    <div id="apiScreen" class="hidden">
+        <div class="api-container">
+            <h2>API Docs</h2>
+            <div class="api-info">
+                <table>
+                    <tbody>
+                        <tr><td>HTTP Method</td><td><code>POST</code></td></tr>
+                        <tr><td>API URL</td><td><code>https://smart-kit.netlify.app/api/v2</code></td></tr>
+                        <tr><td>API Key</td><td>Get an API key on the Account page</td></tr>
+                        <tr><td>Response format</td><td><code>JSON</code></td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <h3>Service list</h3>
+            <div class="api-section">
+                <table>
+                    <thead><tr><th>Parameters</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td>key</td><td>Your API key</td></tr>
+                        <tr><td>action</td><td>services</td></tr>
+                    </tbody>
+                </table>
+                <p><b>Example response</b></p>
+                <pre>[
+  {
+    "service": 1,
+    "name": "Followers",
+    "type": "Default",
+    "category": "First Category",
+    "rate": "0.90",
+    "min": "50",
+    "max": "10000",
+    "refill": true
+  },
+  {
+    "service": 2,
+    "name": "Comments",
+    "type": "Custom Comments",
+    "category": "Second Category",
+    "rate": "8",
+    "min": "10",
+    "max": "1500",
+    "refill": false
+  }
+]</pre>
+            </div>
+            <h3>Add order</h3>
+            <div class="api-section">
+                <p><b>Example response</b></p>
+                <pre>{
+  "order": 23501
+}</pre>
+            </div>
+            <h3>Order status</h3>
+            <div class="api-section">
+                <table>
+                    <thead><tr><th>Parameters</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td>key</td><td>Your API key</td></tr>
+                        <tr><td>action</td><td>status</td></tr>
+                        <tr><td>order</td><td>Order ID</td></tr>
+                    </tbody>
+                </table>
+                <p><b>Example response</b></p>
+                <pre>{
+  "charge": "0.27819",
+  "start_count": "3572",
+  "status": "Partial",
+  "remains": "157",
+  "currency": "INR"
+}</pre>
+            </div>
+            <h3>Multiple orders status</h3>
+            <div class="api-section">
+                <table>
+                    <thead><tr><th>Parameters</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td>key</td><td>Your API key</td></tr>
+                        <tr><td>action</td><td>status</td></tr>
+                        <tr><td>orders</td><td>Order IDs separated by comma</td></tr>
+                    </tbody>
+                </table>
+                <p><b>Example response</b></p>
+                <pre>{
+  "1": {
+    "charge": "0.27819",
+    "start_count": "3572",
+    "status": "Partial",
+    "remains": "157",
+    "currency": "INR"
+  },
+  "10": {
+    "error": "Incorrect order ID"
+  },
+  "100": {
+    "charge": "1.44219",
+    "start_count": "234",
+    "status": "In progress",
+    "remains": "10",
+    "currency": "INR"
+  }
+}</pre>
+            </div>
+            <h3>Create refill</h3>
+             <div class="api-section">
+                <table>
+                    <thead><tr><th>Parameters</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td>key</td><td>Your API key</td></tr>
+                        <tr><td>action</td><td>refill</td></tr>
+                        <tr><td>order</td><td>Order ID</td></tr>
+                    </tbody>
+                </table>
+                <p><b>Example response</b></p>
+                <pre>{
+  "refill": "1"
+}</pre>
+            </div>
+            <h3>Get refill status</h3>
+             <div class="api-section">
+                <table>
+                    <thead><tr><th>Parameters</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td>key</td><td>Your API key</td></tr>
+                        <tr><td>action</td><td>refill_status</td></tr>
+                        <tr><td>refill</td><td>Refill ID</td></tr>
+                    </tbody>
+                </table>
+                <p><b>Example response</b></p>
+                <pre>{
+  "status": "Completed"
+}</pre>
+            </div>
+            <h3>User balance</h3>
+             <div class="api-section">
+                <table>
+                    <thead><tr><th>Parameters</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td>key</td><td>Your API key</td></tr>
+                        <tr><td>action</td><td>balance</td></tr>
+                    </tbody>
+                </table>
+                <p><b>Example response</b></p>
+                <pre>{
+  "balance": "100.84292",
+  "currency": "INR"
+}</pre>
+            </div>
+        </div>
+    </div>
+
     <a id="waFloat" href="#" class="whatsapp-btn" target="_blank">💬</a>
   </div>
 
@@ -331,6 +494,7 @@
     db.ref("settings").on("value", snap => { 
         const s = snap.val() || {}; const texts = s.siteTexts || {}; const theme = s.theme || {};
         const cpTheme = theme.childPanel || {};
+        const apiTheme = theme.apiPage || {};
         const root = document.documentElement;
         
         function hexToRgba(hex, alpha = 1) {
@@ -359,6 +523,13 @@
         root.style.setProperty('--cp-btn-bg', cpTheme.btnBg || '#84cc16');
         root.style.setProperty('--cp-btn-active-bg', cpTheme.btnActiveBg || '#65a30d');
         
+        root.style.setProperty('--api-bg', apiTheme.bg || '#f8f9fa');
+        root.style.setProperty('--api-text', apiTheme.text || '#212529');
+        root.style.setProperty('--api-heading', apiTheme.heading || '#007bff');
+        root.style.setProperty('--api-code-bg', apiTheme.codeBg || '#282c34');
+        root.style.setProperty('--api-code-text', apiTheme.codeText || '#abb2bf');
+        root.style.setProperty('--api-table-head-bg', apiTheme.tableHeadBg || '#e9ecef');
+        
         categoryOrder = s.categoryOrder || [];
         document.getElementById('panelOrders').textContent = s.panelOrders || 0; 
         if(s.whatsappLink) document.getElementById("waFloat").href = s.whatsappLink; 
@@ -381,7 +552,8 @@
     function showServicesScreen() { showPage('servicesScreen'); }
     function showAccountScreen() { showPage('accountScreen'); }
     function showSupportScreen() { showPage('supportScreen'); }
-    function showChildPanelScreen() { showPage('childPanelScreen'); loadChildPanelHistory(); }
+    function showChildPanelScreen() { showPage('childPanelScreen'); }
+    function showApiScreen() { showPage('apiScreen'); }
     function switchChildPanelTab(tab) {
         if (tab === 'order') {
             document.getElementById('childPanelOrder').classList.remove('hidden');
